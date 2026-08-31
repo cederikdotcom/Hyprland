@@ -64,6 +64,7 @@ namespace Render::Pixman {
         UP<IElementRenderer> m_elementRenderer;
         pixman_image_t*      m_targetImage = nullptr; // borrowed from the bound fb
         bool                 m_blend       = true;
+        bool                 m_frameActive = false; // begin() ran for the current frame
 
         struct {
             CHyprSignalListener configReloaded;

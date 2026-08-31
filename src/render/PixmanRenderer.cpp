@@ -105,6 +105,7 @@ void CHyprPixmanRenderer::begin(PHLMONITOR pMonitor, const CRegion& damage) {
         m_renderData.currentFB->setImageDescription(pMonitor->workBufferImageDescription());
 
     pushMonitorTransformEnabled(false);
+    m_frameActive = true;
 }
 
 bool CHyprPixmanRenderer::beginRenderInternal(PHLMONITOR pMonitor, CRegion& damage, bool simple) {
@@ -157,6 +158,19 @@ void CHyprPixmanRenderer::bindFB(SP<IFramebuffer> fb) {
 void CHyprPixmanRenderer::endRender(const std::function<void()>& renderingDoneCallback) {
     const auto PMONITOR = m_renderData.pMonitor;
 
+    // a failed begin (e.g. an unmappable target buffer) can still get an endRender from
+    // callers that don't check begin's result; bail instead of unbalancing renderer state
+    if (!m_frameActive) {
+        Log::logger->log(Log::ERR, "pixman renderer: endRender without a successful begin, dropping the frame");
+        m_renderPass.clear();
+        if (m_currentRenderbuffer)
+            m_currentRenderbuffer->unbind();
+        m_currentRenderbuffer = nullptr;
+        m_currentBuffer       = nullptr;
+        m_targetImage         = nullptr;
+        return;
+    }
+
     m_renderData.damage = m_renderPass.render(m_renderData.damage);
 
     // keep the monitor mirror fb fresh for screencopy / mirrors (GL does this in its end-blit)
@@ -173,6 +187,7 @@ void CHyprPixmanRenderer::endRender(const std::function<void()>& renderingDoneCa
         m_currentRenderbuffer = nullptr;
         m_currentBuffer       = nullptr;
         m_targetImage         = nullptr;
+        m_frameActive         = false;
     });
 
     m_renderData.currentWindow.reset();
