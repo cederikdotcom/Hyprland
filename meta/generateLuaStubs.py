@@ -282,12 +282,12 @@ def pascal_case(s: str) -> str:
 # Config { animations = Config.Animations }
 # Config.Animations { enabled = bool }
 
-type ClassMember = str
-type IsTreeType = bool
-type MemberType = tuple[str, IsTreeType]
-type ConfigSubtable = dict[ClassMember, MemberType]
+ClassMember = str
+IsTreeType = bool
+MemberType = tuple[str, IsTreeType]
+ConfigSubtable = dict[ClassMember, MemberType]
 
-type ConfigTree = dict[str, ConfigSubtable]
+ConfigTree = dict[str, ConfigSubtable]
 
 def config_values_to_config_tree(config_values: dict[str, str]) -> ConfigTree:
     ret: ConfigTree = {};
