@@ -32,6 +32,7 @@
 #include "debug/HyprCtl.hpp"
 #include "debug/crash/CrashReporter.hpp"
 #include "render/GLRenderer.hpp"
+#include "render/PixmanRenderer.hpp"
 #include "render/ShaderLoader.hpp"
 #ifdef USES_SYSTEMD
 #include <helpers/SdDaemon.hpp> // for SdNotify
@@ -588,7 +589,8 @@ void CCompositor::cleanup() {
     Desktop::otherViewState()->clear();
 
     for (auto const& m : State::monitorState()->monitors()) {
-        g_pHyprOpenGL->destroyMonitorResources(m);
+        if (g_pHyprOpenGL)
+            g_pHyprOpenGL->destroyMonitorResources(m);
     }
 
     g_pXWayland.reset();
@@ -689,11 +691,24 @@ void CCompositor::initManagers(eManagersInitStage stage) {
             g_pAsyncResourceGatherer = makeUnique<Hyprgraphics::CAsyncResourceGatherer>();
         } break;
         case STAGE_BASICINIT: {
-            Log::logger->log(Log::DEBUG, "Creating the CHyprOpenGLImpl!");
-            g_pHyprOpenGL = makeUnique<CHyprOpenGLImpl>();
+            // renderer selection: env wins over config, "auto" means gl
+            std::string renderer = getenv("HYPRLAND_RENDERER") ? getenv("HYPRLAND_RENDERER") : "";
+            if (renderer.empty()) {
+                static auto PRENDERER = CConfigValue<std::string>("render:renderer");
+                renderer              = *PRENDERER;
+            }
 
-            Log::logger->log(Log::DEBUG, "Creating the HyprRenderer!");
-            g_pHyprRenderer = makeUnique<CHyprGLRenderer>();
+            if (renderer == "pixman") {
+                // do NOT create CHyprOpenGLImpl: its ctor requires EGL and would abort on a GPU-less box
+                Log::logger->log(Log::DEBUG, "Creating the HyprRenderer (pixman)!");
+                g_pHyprRenderer = makeUnique<Render::Pixman::CHyprPixmanRenderer>();
+            } else {
+                Log::logger->log(Log::DEBUG, "Creating the CHyprOpenGLImpl!");
+                g_pHyprOpenGL = makeUnique<CHyprOpenGLImpl>();
+
+                Log::logger->log(Log::DEBUG, "Creating the HyprRenderer!");
+                g_pHyprRenderer = makeUnique<CHyprGLRenderer>();
+            }
 
             Log::logger->log(Log::DEBUG, "Creating the ProtocolManager!");
             g_pProtocolManager = makeUnique<CProtocolManager>();

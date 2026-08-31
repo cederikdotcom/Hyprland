@@ -232,7 +232,8 @@ std::string SystemInfo::getSystemInfo() {
     if (g_pHyprOpenGL) {
         result += std::format("\nExplicit sync: {}", g_pHyprOpenGL->m_exts.EGL_ANDROID_native_fence_sync_ext ? "supported" : "missing");
         result += std::format("\nGL ver: {}", g_pHyprOpenGL->m_eglContextVersion == CHyprOpenGLImpl::EGL_CONTEXT_GLES_3_2 ? "3.2" : "3.0");
-    }
+    } else
+        result += "\nRenderer: pixman (software)";
 
     if (g_pCompositor) {
         result += std::format("\nBackend: {}", g_pCompositor->m_aqBackend->hasSession() ? "drm" : "sessionless");

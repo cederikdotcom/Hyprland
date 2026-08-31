@@ -62,8 +62,9 @@ namespace Render {
         virtual ~IHyprRenderer();
 
         enum eType : uint8_t {
-            RT_GL = 1,
-            RT_VK = 2,
+            RT_GL     = 1,
+            RT_VK     = 2,
+            RT_PIXMAN = 3,
         };
 
         virtual eType                       type() = 0;
