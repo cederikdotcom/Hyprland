@@ -93,6 +93,10 @@ void CHyprPixmanRenderer::begin(PHLMONITOR pMonitor, const CRegion& damage) {
     m_renderData.damage.set(damage);
     m_renderData.finalDamage.set(damage);
 
+    const auto DMGEXT = m_renderData.damage.copy().getExtents();
+    Log::logger->log(Log::TRACE, "pixman: begin frame on {}: damage {} rect(s), extents {},{} {}x{}", pMonitor->m_name, pixman_region32_n_rects(m_renderData.damage.pixman()),
+                     DMGEXT.x, DMGEXT.y, DMGEXT.width, DMGEXT.height);
+
     // we render straight into the target buffer: main == out == current
     m_renderData.mainFB = m_renderData.currentFB;
     m_renderData.outFB  = m_renderData.currentFB;
