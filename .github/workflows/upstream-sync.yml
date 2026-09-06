@@ -1,0 +1,40 @@
+name: upstream sync check
+
+# Scheduled workflows live on default main, but always inspect the CPU branch.
+# Only trusted schedule/manual events can hold the issue-writing token.
+on:
+  schedule:
+    - cron: '27 6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: daily-upstream-Hyprland
+  cancel-in-progress: false
+jobs:
+  sync:
+    if: github.repository == 'cederikdotcom/Hyprland'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: pixman-renderer
+          fetch-depth: 0
+      - name: Test merge queue lifecycle
+        run: python3 .github/divergence/test_monitor.py
+      # Must precede accounting: a new/unclassified path must not hide a merge issue.
+      - name: Publish upstream merge queue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/divergence/monitor.py --publish
+      - name: Test divergence accounting
+        run: python3 .github/divergence/test_report.py
+      - name: Measure both baselines
+        run: python3 .github/divergence/snapshot.py > "$RUNNER_TEMP/divergence.md"
+      - name: Publish accounting summary
+        run: cat "$RUNNER_TEMP/divergence.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Refresh divergence issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/divergence/refresh_issues.py

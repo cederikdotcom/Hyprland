@@ -1,0 +1,9 @@
+{
+  "repo": "cederikdotcom/Hyprland",
+  "work_branch": "pixman-renderer",
+  "upstream": "hyprwm/Hyprland",
+  "upstream_branches": [
+    "main",
+    "v0.56.2-b"
+  ]
+}

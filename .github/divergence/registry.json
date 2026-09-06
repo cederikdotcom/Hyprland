@@ -72,7 +72,8 @@
         "README.md",
         "docs/divergence.md",
         ".github/divergence/",
-        ".github/workflows/divergence.yml"
+        ".github/workflows/divergence.yml",
+        ".github/workflows/upstream-sync.yml"
       ],
       "handling": "Owns only fork documentation, accounting code, and its CI. Kept separate from runtime patch totals.",
       "rationale": "Reviewable accounting should not masquerade as renderer code. Keep the reporter aligned with Omarchy's implementation.",
