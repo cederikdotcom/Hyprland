@@ -13,6 +13,7 @@ Run with --help for the interface. Invoked as `python3` rather than being
 executable, because AGENTS.md fixes bin/ shebangs to /bin/bash.
 """
 
+# Derived from Omarchy32 CPU; see LICENSE.omarchy for the original license.
 import argparse
 import json
 import re
