@@ -1,3 +1,5 @@
+> **Omarchy32 CPU fork:** the `pixman-renderer` branch adds CPU rendering for machines without usable GLES 3. See [fork divergence, upstream backlog, limitations and tracking issues](docs/divergence.md). It works with [aquamarine's CPU backend](https://github.com/cederikdotcom/aquamarine/blob/cpu-backend/docs/divergence.md); [Omarchy integration](https://github.com/cederikdotcom/omarchy32cpu/blob/main/docs/divergence.md) is tracked separately. Upstream's feature list below does not describe CPU-mode feature parity.
+
 <div align = center>
 
 <img src="https://raw.githubusercontent.com/hyprwm/Hyprland/main/assets/header.svg" width="750" height="300" alt="banner">

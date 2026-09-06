@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "upstream": {
+    "repo": "hyprwm/Hyprland",
+    "branch": "main"
+  },
+  "fork": {
+    "repo": "cederikdotcom/Hyprland",
+    "branch": "pixman-renderer"
+  },
+  "baseline": {
+    "sha": "efb50993780079460b0cbed1363e2166a2de1d9f",
+    "ref": "v0.56.2-b"
+  },
+  "description": "One owner per custom path against the explicitly pinned upstream baseline. Current-main tree distance and graph backlog are reported separately, never presented as custom patch weight.",
+  "groups": [
+    {
+      "id": "pixman-renderer",
+      "title": "CPU renderer and compositor integration",
+      "status": "porting",
+      "pathspecs": [
+        "src/render/PixmanRenderer.cpp",
+        "src/render/PixmanRenderer.hpp",
+        "src/render/pixman/",
+        "src/render/Renderer.hpp",
+        "src/Compositor.cpp",
+        "src/config/values/ConfigValues.cpp",
+        "src/helpers/SystemInfo.cpp"
+      ],
+      "handling": "Adds RT_PIXMAN, pixman textures/framebuffers/elements, renderer selection, GL-free startup/cleanup and diagnostic identification. Includes the failed-begin/end guard and frame-damage tracing.",
+      "rationale": "The GMA 950 cannot run upstream's GLES 3 renderer. Keep until an upstream CPU backend supports the same target; validate flat-mode rendering, damage, resize, buffer lifetime and GL-path non-regression.",
+      "issue": 1
+    },
+    {
+      "id": "shm-capture",
+      "title": "Capture protocol without linux-dmabuf",
+      "status": "upstreamable",
+      "pathspecs": [
+        "src/protocols/ImageCopyCapture.cpp"
+      ],
+      "handling": "Keeps SHM constraints and guards dmabuf device/modifier access when the linuxDma protocol is absent.",
+      "rationale": "A software renderer does not advertise dmabuf. Candidate for a standalone upstream fix after protocol tests; this does not prove all screen-sharing clients work.",
+      "issue": 2
+    },
+    {
+      "id": "python-compat",
+      "title": "Python 3.11 stub-generator compatibility",
+      "status": "upstreamable",
+      "pathspecs": [
+        "meta/generateLuaStubs.py"
+      ],
+      "handling": "Uses assignment type aliases instead of Python 3.12 PEP 695 syntax.",
+      "rationale": "The i686 builder has Python 3.11. Drop when the build toolchain is upgraded and stub generation is tested, or upstream supports the same baseline.",
+      "issue": 3
+    },
+    {
+      "id": "stdlib-compat",
+      "title": "Older libstdc++ truthy helper",
+      "status": "upstreamable",
+      "pathspecs": [
+        "src/helpers/MiscFunctions.cpp"
+      ],
+      "handling": "Replaces ranges::starts_with with an explicit lowercase string and string_view::starts_with.",
+      "rationale": "The target libstdc++ lacks the ranges algorithm. Verify truthy semantics and allocation/performance tradeoff before upstreaming; remove after a tested toolchain upgrade.",
+      "issue": 4
+    },
+    {
+      "id": "fork-accounting",
+      "title": "Fork documentation and divergence tooling",
+      "status": "permanent",
+      "pathspecs": [
+        "README.md",
+        "docs/divergence.md",
+        ".github/divergence/",
+        ".github/workflows/divergence.yml"
+      ],
+      "handling": "Owns only fork documentation, accounting code, and its CI. Kept separate from runtime patch totals.",
+      "rationale": "Reviewable accounting should not masquerade as renderer code. Keep the reporter aligned with Omarchy's implementation.",
+      "issue": 5
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+name: Fork divergence
+on:
+  push:
+    branches: [pixman-renderer]
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: divergence-pixman-renderer
+  cancel-in-progress: false
+jobs:
+  report:
+    if: github.repository == 'cederikdotcom/Hyprland' && github.ref_name == 'pixman-renderer'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch upstream (read only)
+        run: |
+          git remote add upstream https://github.com/hyprwm/Hyprland.git
+          git fetch --no-tags upstream main
+      - name: Test ownership accounting
+        run: python3 .github/divergence/test_report.py
+      - name: Measure both baselines
+        run: python3 .github/divergence/snapshot.py > "$RUNNER_TEMP/divergence.md"
+      - name: Publish job summary
+        run: cat "$RUNNER_TEMP/divergence.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Refresh owned issue blocks
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: cederikdotcom/Hyprland
+        run: python3 .github/divergence/refresh_issues.py
